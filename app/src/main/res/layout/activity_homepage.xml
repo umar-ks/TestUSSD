@@ -61,10 +61,9 @@
                     android:id="@+id/btn_balance"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginEnd="5dp"
                     android:layout_weight="1"
                     android:padding="12dp"
-                    android:text="Balance"
+                    android:text="Subscribe a Package"
                     app:backgroundTint="@color/purple_500" />
 
 <!--                <com.google.android.material.button.MaterialButton-->

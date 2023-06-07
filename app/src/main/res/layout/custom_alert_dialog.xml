@@ -8,7 +8,7 @@
 
     <ScrollView
         android:id="@+id/alert_scrollview"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <ImageView
@@ -46,27 +46,59 @@
                 android:id="@+id/alert_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:paddingHorizontal="20dp"
+                android:layout_marginBottom="20dp"
                 app:layout_constraintTop_toBottomOf="@id/alert_title"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/layout_buttons"
                 android:textAlignment="center"/>
 
             <EditText
                 android:id="@+id/alert_textbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:paddingHorizontal="20dp"
+                android:layout_marginBottom="20dp"
                 android:inputType="numberDecimal"
                 app:layout_constraintTop_toBottomOf="@id/alert_message"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/layout_buttons"
                 android:visibility="gone"
                 android:hint="Enter amount to topup"
                 android:textAlignment="center"/>
+
+
+            <LinearLayout
+                android:id="@+id/package_btns_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp"
+                app:layout_constraintTop_toBottomOf="@id/alert_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/layout_buttons">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/facebook_offer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:backgroundTint="@color/purple_500"
+                    android:visibility="gone"
+                    android:text="Facebook Offer Rs. 10"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/daily_browser"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:backgroundTint="@color/purple_500"
+                    android:visibility="gone"
+                    android:text="Daily Browser Rs. 20"/>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/layout_buttons"
@@ -78,7 +110,6 @@
                 android:gravity="center"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/alert_textbox"
                 app:layout_constraintBottom_toBottomOf="parent">
 
                 <com.google.android.material.button.MaterialButton

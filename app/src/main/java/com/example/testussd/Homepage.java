@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 public class Homepage extends AppCompatActivity {
@@ -73,9 +74,20 @@ public class Homepage extends AppCompatActivity {
         imageView.setVisibility(View.VISIBLE);
         TextView title = dialog.findViewById(R.id.alert_title);
         TextView message = dialog.findViewById(R.id.alert_message);
+        MaterialButton facebookOffer = dialog.findViewById(R.id.facebook_offer);
+        MaterialButton dailyBrowser = dialog.findViewById(R.id.daily_browser);
         message.setVisibility(View.VISIBLE);
-        dialog.findViewById(R.id.btn_neutral).setOnClickListener(view -> {
+        Button neutral = dialog.findViewById(R.id.btn_neutral);
+        neutral.setOnClickListener(view -> {
             dialog.dismiss();
+        });
+        facebookOffer.setOnClickListener(view -> {
+            dialog.dismiss();
+            this.sendPackageUSSD("*220*3*1#");
+        });
+        dailyBrowser.setOnClickListener(view -> {
+            dialog.dismiss();
+            this.sendPackageUSSD("*117*11#");
         });
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -86,7 +98,6 @@ public class Homepage extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             progressDialog.show();
-            imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_check_circle_24));
 
             TelephonyManager manager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 
@@ -97,26 +108,36 @@ public class Homepage extends AppCompatActivity {
                     @Override
                     public void onReceiveUssdResponse(TelephonyManager telephonyManager, String request, CharSequence response) {
                         super.onReceiveUssdResponse(telephonyManager, request, response);
-                        imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_check_circle_24));
-                        System.out.println("RESPONSE: " + response);
-                        title.setText("Success!");
-                        double balance = Double.parseDouble(response.subSequence(3, 7).toString());
-                        if (balance < 10) {
-                            if (((int)balance % 2.0) == 0.0) {
-                                title.setTextColor(getResources().getColor(R.color.purple_500));
-                                message.setTextColor(getResources().getColor(R.color.purple_500));
+                        if (response.toString().startsWith("Rs.")) {
+                            double balance = Double.parseDouble(response.subSequence(3, 7).toString());
+                            Log.e("BALANCE", String.valueOf(balance));
+                            if (balance > 20) {
+                                imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_check_circle_24));
+                                title.setText("Subscribe");
+                                facebookOffer.setVisibility(View.VISIBLE);
+                                dailyBrowser.setVisibility(View.VISIBLE);
+                                neutral.setText("Close");
+                            } else if(balance > 10) {
+                                imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_check_circle_24));
+                                title.setText("Subscribe");
+                                facebookOffer.setVisibility(View.VISIBLE);
+                                neutral.setText("Close");
                             } else {
-                                title.setTextColor(getResources().getColor(R.color.jazz_yellow));
-                                message.setTextColor(getResources().getColor(R.color.jazz_yellow));
+                                imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_cancel_24));
+                                message.setText("Insufficient balance to subscribe an offer.");
+                                title.setText("Error!");
                             }
+                            progressDialog.dismiss();
+                            dialog.show();
+                            Log.e("TAG", "onReceiveUssdResponse:  Ussd Response = " + response.toString().trim());
                         } else {
-                            title.setTextColor(getResources().getColor(R.color.green));
-                            message.setTextColor(getResources().getColor(R.color.green));
+                            imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_cancel_24));
+                            message.setText("Insufficient balance to subscribe an offer.");
+                            title.setText("Error!");
+                            progressDialog.dismiss();
+                            dialog.show();
+                            Log.e("TAG", "onReceiveUssdResponse:  Ussd Response = " + response.toString().trim());
                         }
-                        message.setText(response.toString().trim());
-                        progressDialog.dismiss();
-                        dialog.show();
-                        Log.e("TAG", "onReceiveUssdResponse:  Ussd Response = " + response.toString().trim());
                     }
 
                     @Override
@@ -150,6 +171,67 @@ public class Homepage extends AppCompatActivity {
 //                dialog.show();
 //            }
 //        }, 3000);
+    }
+
+
+    public void sendPackageUSSD(String ussd) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_alert_dialog);
+        dialog.setCancelable(true);
+        ImageView imageView = dialog.findViewById(R.id.alert_icon);
+        imageView.setVisibility(View.VISIBLE);
+        TextView title = dialog.findViewById(R.id.alert_title);
+        title.setVisibility(View.GONE);
+        TextView message = dialog.findViewById(R.id.alert_message);
+        message.setVisibility(View.VISIBLE);
+        Button neutral = dialog.findViewById(R.id.btn_neutral);
+        neutral.setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, 234);
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            progressDialog.show();
+            TelephonyManager manager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+
+            String carrier = manager.getSimOperator();
+            if (carrier.equals("41001")) {
+
+                manager.sendUssdRequest(ussd, new TelephonyManager.UssdResponseCallback() {
+                    @SuppressLint("ResourceAsColor")
+                    @Override
+                    public void onReceiveUssdResponse(TelephonyManager telephonyManager, String request, CharSequence response) {
+                        super.onReceiveUssdResponse(telephonyManager, request, response);
+                        imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_check_circle_24));
+                        message.setText(response.toString().trim());
+                        progressDialog.dismiss();
+                        dialog.show();
+                    }
+
+                    @Override
+                    public void onReceiveUssdResponseFailed(TelephonyManager telephonyManager, String request, int failureCode) {
+                        super.onReceiveUssdResponseFailed(telephonyManager, request, failureCode);
+                        imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_cancel_24));
+                        message.setText("An Error Occurred. Please try again");
+                        title.setText("Error!");
+                        progressDialog.dismiss();
+                        dialog.show();
+                        Log.e("TAG", "onReceiveUssdResponseFailed: " + "" + failureCode);
+                    }
+                }, new Handler());
+
+            } else {
+                imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_cancel_24));
+                title.setText("Error!");
+                message.setText("This app is for JAZZ only kindly select Jazz SIM for data to use this app");
+                progressDialog.dismiss();
+                dialog.show();
+            }
+        }
     }
 
 //    public void onTopupClicked() {
